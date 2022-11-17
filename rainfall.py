@@ -1,13 +1,13 @@
 import requests
 import random
 import threading
-import sys
-from msvcrt import getch, kbhit
+from os import environ
+#from msvcrt import getch, kbhit
 # from multiprocessing import cpu_count
 from time import sleep
 
 MAXTHREADS = 2  # cpu_count()/2  # Get max amount of threads we can safely create
-BASEURL = ["http://mc1-", "-", ":5000/blink?values=", "."]
+BASEURL = ["http://mc1-", "-", ":5000/blink?value=", "."]
 COLOR = [255, 0, 0]
 timing_event = threading.Event()
 exit_event = threading.Event()
@@ -72,7 +72,7 @@ def rainOnStack(nth_stack, led, color, baseURL, maxDrops, randRange):
         if (len(droplet_list) < maxDrops):
             if (0 == random.randint(0, randRange)):
                 droplet_list.append(
-                    Droplet(nth_stack, 0, random.choice(led), color, baseURL))
+                    Droplet(nth_stack, 1, random.choice(led), color, baseURL))
 
         if (timing_event.wait()):
             for droplet in droplet_list:
@@ -88,8 +88,8 @@ def rainOnStack(nth_stack, led, color, baseURL, maxDrops, randRange):
 
 
 if __name__ == "__main__":
-    stackNumber = sys.argv[1]
-    color = [sys.argv[2], sys.argv[3], sys.argv[4]]
+    stackNumber = 1  # environ['RAINFALL_STACK']
+    color = COLOR  # environ['RAINFALL_COLOR']
 
     print(color)
 
@@ -103,14 +103,14 @@ if __name__ == "__main__":
 
     while True:
         # Stop Daemons
-        if kbhit():
-            if (ord(getch()) == 113):
-                exit_event.set()
-                print(
-                    "\n####################################\nStop Singal to daemons send, exiting\n####################################\n")
-                sleep(0.5)
-                print("\n...Bye!")
-                break
+        # if kbhit():
+        #    if (ord(getch()) == 113):
+        #        exit_event.set()
+        #        print(
+        #            "\n####################################\nStop Singal to daemons send, exiting\n####################################\n")
+        #        sleep(0.5)
+        #        print("\n...Bye!")
+        #        break
         sleep(1)
         timing_event.set()
         timing_event.clear()
