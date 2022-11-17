@@ -37,9 +37,10 @@ class Droplet:
             # requests.get(self.baseURL[0]+str(self.stack)+self.baseURL[1]+str(self.node) +
             #             self.baseURL[2]+str(self.led)+self.baseURL[3]+"0.0.0")
             # NOTE: DEBUG INFO
-            print("Removing last Droplet:")
-            print(self.baseURL[0]+str(self.stack)+self.baseURL[1]+str(self.node-1) +
-                  self.baseURL[2]+str(self.led)+self.baseURL[3]+"0.0.0")
+            print("Removing last Droplet:\n" +
+                  self.baseURL[0]+str(self.stack)+self.baseURL[1]+str(self.node-1) +
+                  self.baseURL[2]+str(self.led)+self.baseURL[3]+"0.0.0"
+                  )
             # DEBUG END
         if (not self.removeDroplet):
             # Draw next drop
@@ -47,9 +48,11 @@ class Droplet:
             # requests.get(self.baseURL[0]+str(self.stack)+self.baseURL[1]+str(self.node-1) +
             #             self.baseURL[2]+str(self.led)+self.baseURL[3]+self.baseURL[3].join(map(str, color)))
             # NOTE: DEBUG INFO
-            print("Created Droplet:")
-            print(self.baseURL[0]+str(self.stack)+self.baseURL[1]+str(self.node) +
-                  self.baseURL[2]+str(self.led)+self.baseURL[3]+self.baseURL[3].join(map(str, color)))
+            print("Created Droplet:\n" +
+                  self.baseURL[0]+str(self.stack)+self.baseURL[1]+str(self.node) +
+                  self.baseURL[2]+str(self.led)+self.baseURL[3] +
+                  self.baseURL[3].join(map(str, color))
+                  )
             # DEBUG END
         self.node += 1  # Increment Node
         if (not self.removeLastDrop and self.node > 1):
