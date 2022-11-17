@@ -5,7 +5,7 @@ from msvcrt import getch, kbhit
 # from multiprocessing import cpu_count
 from time import sleep
 
-MAXTHREADS = 4  # cpu_count()/2  # Get max amount of threads we can safely create
+MAXTHREADS = 2  # cpu_count()/2  # Get max amount of threads we can safely create
 BASEURL = ["http://mc1-", "-", ":5000/blink?values=", "."]
 COLOR = [255, 0, 0]
 timing_event = threading.Event()
@@ -78,11 +78,13 @@ def rainOnStack(nth_stack, led, color, baseURL, maxDrops, randRange):
 
 
 if __name__ == "__main__":
+    stackNumber = input("Please input the Stack to controll")
+
     threads = []
     color = [255, 0, 0]
-    for nth_stack in range(MAXTHREADS):
+    for nth_thread in range(MAXTHREADS):
         threads.append(threading.Thread(target=rainOnStack,
-                       args=(1, [1], COLOR, BASEURL, 2, 1), daemon=True))
+                       args=(stackNumber, [1], COLOR, BASEURL, 2, 1), daemon=True))
 
     for t in threads:
         t.start()
