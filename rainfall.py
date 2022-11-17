@@ -1,61 +1,101 @@
 import requests
 import random
 import threading
-#from multiprocessing import cpu_count
+from msvcrt import getch, kbhit
+# from multiprocessing import cpu_count
 from time import sleep
 
-maxThreads = 4  # cpu_count()/2  # Get max amount of threads we can safely create
-baseURL = ["http://mc1-", "-", ":5000/blink?values=", "."]
-event_object = threading.Event()
+MAXTHREADS = 4  # cpu_count()/2  # Get max amount of threads we can safely create
+BASEURL = ["http://mc1-", "-", ":5000/blink?values=", "."]
+COLOR = [255, 0, 0]
+timing_event = threading.Event()
+exit_event = threading.Event()
 
 
 class Droplet:
-    def init(stack, node, led, color, baseURL):
-        this.stack = stack
-        this.node = node
-        this.led = led
-        this.baseURL = baseURL
-        this.removeLastDrop = False
-        this.removeDrop = False
+    def __init__(self, stack, node, led, color, baseURL):
+        self.stack = stack
+        self.node = node
+        self.led = led
+        self.baseURL = baseURL
+        self.removeLastDrop = False
+        self.removeDroplet = False
 
         # If no Color was given use Random RGB
         if (len(color) == 0):
-            this.color = [random.randint(0, 255), random.randint(
+            self.color = [random.randint(0, 255), random.randint(
                 0, 255), random.randint(0, 255)]
         else:
-            this.color = color
+            self.color = color
 
-    def movedroplet():
-        if (not this.removeDrop and this.node > 3):
-            this.removeDrop = True
+    def movedroplet(self):
+        if (not self.removeDroplet and self.node > 3):
+            self.removeDroplet = True
         # Remove last drop, this makes it possible to simulate a sliding effect
-        if (removeDrop):
-            requests.get(this.baseURL[0]+str(this.stack)+this.baseURL[1]+str(this.node-1) +
-                         this.baseURL[2]+str(this.led)+this.baseURL[3]+this.baseURL[3].join(map(str, color)))
-        if (not this.removeDrop):
+        if (self.removeLastDrop):
+            # requests.get(self.baseURL[0]+str(self.stack)+self.baseURL[1]+str(self.node) +
+            #             self.baseURL[2]+str(self.led)+self.baseURL[3]+"0.0.0")
+            # NOTE: DEBUG INFO
+            print("Removing last Droplet:")
+            print(self.baseURL[0]+str(self.stack)+self.baseURL[1]+str(self.node-1) +
+                  self.baseURL[2]+str(self.led)+self.baseURL[3]+"0.0.0")
+            # DEBUG END
+        if (not self.removeDroplet):
             # Draw next drop
-            requests.get(this.baseURL[0]+str(this.stack)+this.baseURL[1]+str(this.node) +
-                         this.baseURL[2]+str(this.led)+this.baseURL[3]+this.baseURL[3].join(map(str, color)))
-        this.node += 1  # Increment Node
-        if (not this.removeLastDrop and this.node > 1):
-            this.removeLastDrop = True
+
+            # requests.get(self.baseURL[0]+str(self.stack)+self.baseURL[1]+str(self.node-1) +
+            #             self.baseURL[2]+str(self.led)+self.baseURL[3]+self.baseURL[3].join(map(str, color)))
+            # NOTE: DEBUG INFO
+            print("Created Droplet:")
+            print(self.baseURL[0]+str(self.stack)+self.baseURL[1]+str(self.node) +
+                  self.baseURL[2]+str(self.led)+self.baseURL[3]+self.baseURL[3].join(map(str, color)))
+            # DEBUG END
+        self.node += 1  # Increment Node
+        if (not self.removeLastDrop and self.node > 1):
+            self.removeLastDrop = True
 
 
-def rainOnStack(nth_stack, color):
-    droplets = []
-    while true:
-        if (event_object.wait()):
-            for droplet in droplets:
+def rainOnStack(nth_stack, led, color, baseURL, maxDrops, randRange):
+    droplet_list = []
+    # for l_index in led:
+    #    droplet_list.append(Droplet(nth_stack, 0, l_index, color, baseURL))
+
+    while not exit_event.is_set():
+        # Create new droplet if random int over certain number and list lenght under maxDrops
+        if (len(droplet_list) < maxDrops):
+            if (0 == random.randint(0, randRange)):
+                droplet_list.append(
+                    Droplet(nth_stack, 0, random.choice(led), color, baseURL))
+
+        if (timing_event.wait()):
+            for droplet in droplet_list:
+                if (droplet.removeDroplet):
+                    droplet_list.remove(droplet)
+                    print("Droplet at "+str(droplet.node)+" removed")
+                    continue
                 droplet.movedroplet()
+                sleep(0.2)
 
 
 if __name__ == "__main__":
     threads = []
     color = [255, 0, 0]
-    for nth_stack in range(maxThreads):
+    for nth_stack in range(MAXTHREADS):
         threads.append(threading.Thread(target=rainOnStack,
-                       args=(nth_stack, color), daemon=True))
+                       args=(1, [1], COLOR, BASEURL, 2, 1), daemon=True))
+
+    for t in threads:
+        t.start()
 
     while True:
-        sleep(0.5)
-        event_object.set()
+        # Stop Daemons
+        if kbhit():
+            if (ord(getch()) == 113):
+                exit_event.set()
+                print("Stop Singal to daemons send, exiting")
+                sleep(0.5)
+                print("Bye!")
+                break
+        sleep(1)
+        timing_event.set()
+        timing_event.clear()
