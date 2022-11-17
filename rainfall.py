@@ -1,6 +1,7 @@
 import requests
 import random
 import threading
+import sys
 from msvcrt import getch, kbhit
 # from multiprocessing import cpu_count
 from time import sleep
@@ -78,13 +79,16 @@ def rainOnStack(nth_stack, led, color, baseURL, maxDrops, randRange):
 
 
 if __name__ == "__main__":
-    stackNumber = input("Please input the Stack to controll")
+    stackNumber = sys.argv[0]
+    color = [sys.argv[1], sys.argv[2], sys.argv[3]]
+
+    print(color)
 
     threads = []
     color = [255, 0, 0]
     for nth_thread in range(MAXTHREADS):
         threads.append(threading.Thread(target=rainOnStack,
-                       args=(stackNumber, [1], COLOR, BASEURL, 2, 1), daemon=True))
+                       args=(stackNumber, [1], color, BASEURL, 2, 1), daemon=True))
 
     for t in threads:
         t.start()
