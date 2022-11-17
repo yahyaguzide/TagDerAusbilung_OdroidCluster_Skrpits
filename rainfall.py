@@ -34,25 +34,28 @@ class Droplet:
             self.removeDroplet = True
         # Remove last drop, this makes it possible to simulate a sliding effect
         if (self.removeLastDrop):
-            # requests.get(self.baseURL[0]+str(self.stack)+self.baseURL[1]+str(self.node) +
-            #             self.baseURL[2]+str(self.led)+self.baseURL[3]+"0.0.0")
+            requests.get(self.baseURL[0]+str(self.stack)+self.baseURL[1]+str(self.node-1) +
+                         self.baseURL[2]+str(self.led)+self.baseURL[3]+"0.0.0"
+                         )
             # NOTE: DEBUG INFO
-            print("Removing last Droplet:\n" +
-                  self.baseURL[0]+str(self.stack)+self.baseURL[1]+str(self.node-1) +
-                  self.baseURL[2]+str(self.led)+self.baseURL[3]+"0.0.0"
-                  )
+            # print("Removing last Droplet:\n" +
+            #      self.baseURL[0]+str(self.stack)+self.baseURL[1]+str(self.node-1) +
+            #      self.baseURL[2]+str(self.led)+self.baseURL[3]+"0.0.0"
+            #      )
             # DEBUG END
         if (not self.removeDroplet):
             # Draw next drop
 
-            # requests.get(self.baseURL[0]+str(self.stack)+self.baseURL[1]+str(self.node-1) +
-            #             self.baseURL[2]+str(self.led)+self.baseURL[3]+self.baseURL[3].join(map(str, color)))
+            requests.get(self.baseURL[0]+str(self.stack)+self.baseURL[1]+str(self.node) +
+                         self.baseURL[2]+str(self.led)+self.baseURL[3] +
+                         self.baseURL[3].join(map(str, self.color))
+                         )
             # NOTE: DEBUG INFO
-            print("Created Droplet:\n" +
-                  self.baseURL[0]+str(self.stack)+self.baseURL[1]+str(self.node) +
-                  self.baseURL[2]+str(self.led)+self.baseURL[3] +
-                  self.baseURL[3].join(map(str, color))
-                  )
+            # print("Created Droplet:\n" +
+            #      self.baseURL[0]+str(self.stack)+self.baseURL[1]+str(self.node) +
+            #      self.baseURL[2]+str(self.led)+self.baseURL[3] +
+            #      self.baseURL[3].join(map(str, self.color))
+            #      )
             # DEBUG END
         self.node += 1  # Increment Node
         if (not self.removeLastDrop and self.node > 1):
@@ -75,23 +78,25 @@ def rainOnStack(nth_stack, led, color, baseURL, maxDrops, randRange):
             for droplet in droplet_list:
                 if (droplet.removeDroplet):
                     droplet_list.remove(droplet)
-                    print("Droplet at "+str(droplet.node)+" removed")
+                    # NOTE: DEBUG INFO
+                    # print("\nDroplet on stack "+str(droplet.stack) +
+                    #      " at "+str(droplet.node)+" removed\n")
+                    # DEBUG END
                     continue
                 droplet.movedroplet()
                 sleep(0.2)
 
 
 if __name__ == "__main__":
-    stackNumber = sys.argv[0]
-    color = [sys.argv[1], sys.argv[2], sys.argv[3]]
+    stackNumber = sys.argv[1]
+    color = [sys.argv[2], sys.argv[3], sys.argv[4]]
 
     print(color)
 
     threads = []
-    color = [255, 0, 0]
     for nth_thread in range(MAXTHREADS):
         threads.append(threading.Thread(target=rainOnStack,
-                       args=(stackNumber, [1], color, BASEURL, 2, 1), daemon=True))
+                                        args=(stackNumber, [1, 2], color, BASEURL, 2, 2), daemon=True))
 
     for t in threads:
         t.start()
@@ -101,9 +106,10 @@ if __name__ == "__main__":
         if kbhit():
             if (ord(getch()) == 113):
                 exit_event.set()
-                print("Stop Singal to daemons send, exiting")
+                print(
+                    "\n####################################\nStop Singal to daemons send, exiting\n####################################\n")
                 sleep(0.5)
-                print("Bye!")
+                print("\n...Bye!")
                 break
         sleep(1)
         timing_event.set()
